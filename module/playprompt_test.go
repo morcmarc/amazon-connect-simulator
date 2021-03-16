@@ -38,6 +38,15 @@ func TestPlayPrompt(t *testing.T) {
 			{"name":"TextToSpeechType","value":"ssml"}
 		]
 	}`
+	jsonUserDefined := `{
+		"id":"55c7b51c-ab55-4c63-ac42-235b4a0f904f",
+		"type":"PlayPrompt",
+		"branches":[{"condition":"Success","transition":"00000000-0000-4000-0000-000000000001"}],
+		"parameters":[
+			{"name":"Text","value":"The estimated wait time is $.User Defined.estimatedWaitTime minutes. Please hold.","namespace":null},
+			{"name":"TextToSpeechType","value":"text"}
+		]
+	}`
 	testCases := []struct {
 		desc    string
 		module  string
@@ -77,6 +86,13 @@ func TestPlayPrompt(t *testing.T) {
 			expOut:  "<speak>Thanks for your call.</speak>",
 			expSSML: true,
 		},
+		{
+			desc:    "success - user defined",
+			module:  jsonUserDefined,
+			exp:     "00000000-0000-4000-0000-000000000001",
+			expOut:  "The estimated wait time is 3 minutes. Please hold.",
+			expSSML: false,
+		},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
@@ -87,7 +103,8 @@ func TestPlayPrompt(t *testing.T) {
 			}
 			state := testCallState{
 				contactData: map[string]string{
-					"name": "Edward",
+					"name":              "Edward",
+					"estimatedWaitTime": "3",
 				},
 			}.init()
 			next, err := mod.Run(state)

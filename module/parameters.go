@@ -134,7 +134,7 @@ func (call parameterResolver) unmarshal(plist flow.ModuleParameterList, into int
 	return nil
 }
 
-var jsonP = regexp.MustCompile(`\$\.([a-zA-Z]+)\.([0-9a-zA-Z_\-]+)`)
+var jsonP = regexp.MustCompile(`\$\.([a-zA-Z\s]+)\.([0-9a-zA-Z_\-]+)`)
 
 // jsonPath takes a string like "you live in $.External.city" and interpolates the jsonPath components.
 func (call parameterResolver) jsonPath(msg string) (out string) {
@@ -167,6 +167,10 @@ func (call parameterResolver) jsonPath(msg string) (out string) {
 				}
 			} else if key == "Type" {
 				val = "TELEPHONE_NUMBER"
+			}
+		case flow.NamespaceUserDefined:
+			if s := call.GetContactData(key); s != nil {
+				val = *s
 			}
 		default:
 			if s := call.GetSystem(flow.SystemKey(key)); s != nil {
